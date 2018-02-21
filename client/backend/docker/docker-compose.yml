@@ -1,0 +1,45 @@
+nginx:
+  build: images/nginx
+  command: nginx -g "daemon off;"
+  links:
+    - php
+  ports:
+    - "80:80"
+php:
+  build: images/php
+  volumes:
+    - ./images/php:/var/www/html
+    - ../:/var/www/html/app
+  working_dir: /var/www/html/app/public
+  command: php-fpm
+  links:
+    - db
+    - cache
+  ports:
+    - "9000:9000"
+  extra_hosts:
+    - "dockerhost:172.17.0.4"
+  environment:
+    APP_ENV: local
+    APP_DEBUG: 'true'
+    APP_KEY: Qq60mut9w3xLt5hlU8E6DPtQEOBwpmhX
+    APP_LOCALE: en
+    APP_FALLBACK_LOCALE: en
+    DB_CONNECTION: mysql
+    DB_HOST: db
+    DB_DATABASE: lumen
+    DB_USERNAME: lumen
+    DB_PASSWORD: secret
+    MEMCACHED_HOST: cache
+    CACHE_DRIVER: memcached
+db:
+  image: mysql
+  ports:
+    - "3307:3306"
+  environment:
+    MYSQL_ROOT_PASSWORD: secret
+    MYSQL_DATABASE: lumen
+    MYSQL_USER: lumen
+    MYSQL_PASSWORD: secret
+cache:
+  image: memcached
